@@ -28,55 +28,72 @@ s0 = [[1],[0]]
 s1 :: [[Complex Float]]
 s1 = [[0],[1]]
 
-sh0 :: [[Complex Float]]  
-sh0 = undefined
+hadamard :: [[Complex Float]]
+hadamard = [[1/sqrt(2), 1/sqrt(2)], [1/sqrt(2), -1/sqrt(2)]]
 
-sh1 :: [[Complex Float]]
-sh1 = undefined 
+plus :: [[Complex Float]]
+plus = gate hadamard s0
+
+minus :: [[Complex Float]]
+minus = gate hadamard s1
 --2 a)
 --00
 s00 ::[[Complex Float]]
-s00 = undefined 
+s00 = tensor s0 s0
 --11
 s11 :: [[Complex Float]]
-s11 = undefined
+s11 = tensor s1 s1
 
 --2 b)
 s010 :: [[Complex Float]]
-s010 = undefined
+s010 = tensor (tensor s0 s1) s0
 
 --3 a)
 -- Hint use function conjugate
 -- >x = 2 :+ (-1)
 -- >conjugate x
 -- 2:+ 1
+vconjugate :: [Complex Float] -> [Complex Float]
+vconjugate [] = []
+vconjugate (x:xs) = (conjugate x) : vconjugate xs
+
+cnorm :: [[Complex Float]] -> Complex Float
+cnorm [] = 0
+cnorm ([]:xs) = cnorm xs
+cnorm m = sqrt(sum(zipWith (*) (head m) (vconjugate (head m))) + cnorm (tail m))
+
 norm :: [[Complex Float]] -> Complex Float
-norm v = undefined
+norm v = sqrt (sum [ (head a)*(conjugate(head a))|a<-v])
 
 --3 b)
 normalise :: [[Complex Float]] -> [[Complex Float]]
-normalise v = undefined
+normalise m = [[x/norm(m) | x <- y] | y <- m]
 
 --4 a)
 --hint: recall cis 
 --cis x = cos x + i sin x = e^{ix}
 u3 :: (Float, Float, Float) -> [[Complex Float]]
-u3 (t, p, l) = undefined
+u3 (t, p, l) = [[cos(t/2):+ 0.0, -cis(l)*(sin(t/2):+0.0)], [cis p*(sin(t/2):+0.0),cis(p+l)*(cos(t/2):+0.0)]]
 
 --4 b)
 
-au3 = undefined
+au3 = u3(0,pi,0)
 --
 
-bu3 = undefined
+bu3 = u3(pi/2,0,pi)
 --
 
 --5 a)
+cn :: [[Complex Float]]
+cn = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]]
+
 systa :: [[Complex Float]]
-systa = undefined
+systa = gate cn (tensor (gate hadamard s0) s0)
+
 --5 b)
-systb ::[[Complex Float]]
-systb = undefined
+systb :: [[Complex Float]]
+systb = (hadamard `tensor` hadamard) `gate` (cn `gate` ((hadamard `tensor` hadamard) `gate` s00))  
+
 --6
 cnot_ :: Int -> [[Complex Float]]
 cnot_ n = undefined
