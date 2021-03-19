@@ -68,8 +68,14 @@ meas v = do
 
 --2a
 shots :: [[Complex Float]] -> Int -> IO [[Char]]
-shots v n = undefined
+shots _ 0 = do return []
+shots v n = do
+  x  <- meas v
+  xs <- shots v (n-1)
+  return (x:xs)
 
 --2b
 freqs ::[[Complex Float]] -> Int -> IO [([Char], Int)]
-freqs v n = undefined
+freqs v n = do
+  l <- group (sort (shots v n))
+  return [(head x , length x)] | x <- l

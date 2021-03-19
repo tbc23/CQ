@@ -95,5 +95,15 @@ systb :: [[Complex Float]]
 systb = (hadamard `tensor` hadamard) `gate` (cn `gate` ((hadamard `tensor` hadamard) `gate` s00))  
 
 --6
+lin a b = (replicate a (0:+0)) ++ [1:+0] ++ (replicate b (0:+0))
+
+auxcnot x ls
+    | x <= ls = lin (x-1) (ls*2-x)
+    | mod x 2 == 0 = lin (x-2) (ls*2-(x+1))
+    | otherwise = lin (x) (ls*2-(x-1))
+
+
 cnot_ :: Int -> [[Complex Float]]
-cnot_ n = undefined
+cnot_ n = [(auxcnot x l) | x <- [1..l]] ++ [auxcnot x l | x <- [(l+1)..(l*2)] ]
+    where 
+    	l = quot(2^(n)) 2
