@@ -2,7 +2,6 @@ module Main where
 
 import Quipper
 import Quipper.Internal.Printing
-import pyzx as zx
 
 import System.Random
 
@@ -26,8 +25,6 @@ mycnot a b = do
 
 print_mycnot :: IO()
 print_mycnot = print_simple ASCII (mycnot True True)
-
-my_qc = zx.Circuit.load("decompose")
 
 main :: IO ()
 main = putStrLn "Hello, Haskell!"
