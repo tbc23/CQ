@@ -1,0 +1,82 @@
+def QFT [n:!N] (x: uint[n]) mfree: uint[n] {
+    for k in [0..n div 2) {
+        (x[k],x[n-k-1]) := (x[n-k-1],x[k]);
+    }
+    for k in [0..n) {
+        x[k] := H(x[k]);
+        for l in [k+1..n) {
+            if x[l] && x[k] {
+                phase(2*pi*2^(k-l-1));
+            }
+        }
+    }
+    return x;
+}
+
+def groverDiff[n:!N](cand:uint[n]) mfree:uint[n] {
+	for k in [0..n) { cand[k] := H(cand[k]); }
+	if cand!=0{ phase(pi); }
+	for k in [0..n) { cand[k] := H(cand[k]); }
+	return cand;
+}
+
+
+def calculateM (const m:!R, const n:!N, const t:!N) {
+    theta := (m/(2^t))*pi*2:!R;
+    num := 2^n:!N;
+    num2 := num * (sin(theta/2)^2);
+    r := num - num2;
+    //dump();
+}
+
+def quantumCount[k:!N]( f:uint[k]! -> lifted B,  precision:!N) {
+    n := 0:uint[k];
+    ancilla := 0:uint[precision];
+    for i in [0..precision) { ancilla[i] := H(ancilla[i]); }
+    for i in [0..k) { n[i]:= H(n[i]); }
+    for i in [0..precision) { 
+        if ancilla[i] {
+            for l in [0..2^i) {
+                // Grover Operator which calls the oracle f
+                if f(n) { phase(pi); }
+                n := groverDiff(n);
+            }
+        }
+    }
+    ancilla := reverse(QFT[precision])(ancilla);
+    result := measure(ancilla);   
+    gmeasure := measure(n);
+    r := result as !R;
+    calculateM(r,k,precision);
+    return result;
+}
+
+def main () {
+    test_qcount();
+}
+
+def test_qcount () {
+    n := 4:!N;
+    
+    f0 := λ(x:uint[4])lifted:𝔹{ return x==8 || x==9 || x==10 || x==11; };
+    f1 := λ(x:uint[4])lifted:𝔹{ return x==4 || x==5 || x==6; };
+    f2 := λ(x:uint[4])lifted:𝔹{ return x==1 || x==2; };
+    f3 := λ(x:uint[4])lifted:𝔹{ return x==3; };
+    
+    g := quantumCount(f0,4);    
+    x := quantumCount(f1,4);
+    y := quantumCount(f2,4);
+    z := quantumCount(f3,4);
+  
+    print(g);
+    print(x);
+    print(y);
+    print(z);
+    
+    assert ( g==4 );
+    assert ( x==3 );
+    assert ( y==2 );
+    assert ( z==1 ); 
+
+
+}
